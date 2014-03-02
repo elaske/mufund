@@ -1,5 +1,10 @@
 GOOGLE FINANCE NOTES
 ===========================================================
+Google Finance includes all of the quote data in special tags as part of it's "+1" button. This must enable them to share all of the data without having to scrape their own pages.
+This might be easier to use to gather the data from.
+
+Here are a couple examples:
+
 FBIOX:
 <div id="sharebox-data" itemscope="itemscope" itemtype="http://schema.org/Intangible/FinancialQuote">
 <meta itemprop="name" content="Fidelity Select Biotechnology Portfolio">
