@@ -3,12 +3,12 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 23:12:45
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-02 00:30:55
+# @Last Modified time: 2014-03-02 02:18:20
 
 import urllib
 import re
 
-class StockQuote:
+class StockQuote(object):
     """
     A class that handles scraping of a ticker symbol's data from Google Finance.
     """
