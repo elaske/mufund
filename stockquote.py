@@ -3,12 +3,16 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 23:12:45
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-02 00:23:39
+# @Last Modified time: 2014-03-02 00:30:55
 
 import urllib
 import re
 
 class StockQuote:
+    """
+    A class that handles scraping of a ticker symbol's data from Google Finance.
+    """
+    
     def __init__(self):
         self._url = 'http://finance.google.com/finance?q='
         self._ticker = ''
