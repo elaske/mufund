@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-02 19:38:32
+# @Last Modified time: 2014-03-02 23:31:49
 
 import urllib
 import urllib2
@@ -45,17 +45,31 @@ class MutualFundData(StockQuote):
 
         dictHoldings = json.loads(jsonHoldings)
 
-        print dictHoldings.keys()
+        #print dictHoldings.keys()
 
         # Create a soup for the HTML
         self._soup = BeautifulSoup(dictHoldings['htmlStr'])
         self._holding_data = self._soup('table', id='equity_holding_tab')
         self._price_data = self._soup('table', id='equityPrice_holding_tab')
 
-        print self._holding_data
-        print self._price_data
+        #print self._holding_data
+        #print self._price_data
 
     def holdings(self):
         """
         Returns a tuple of {ticker : portfolio weight} for all available holdings.
         """
+        # This grabs the correct <tbody> tag which holds the table data
+        tbody = self._holding_data[0]('tbody', id='holding_epage0')
+        # There are "empty" rows, but they have a class specified.
+        # The data rows are undecorated <tr>, so only take those:
+        holdingRows = tbody[0]('tr', class_='')
+
+        holdingHeaderElements = self._holding_data[0]('thead')[0]('th')
+
+        print len(holdingHeaderElements), len(holdingRows[0]('td'))
+        print holdingHeaderElements
+
+        #print rows[0]('td', align='right')
+        #print len(rows)
+        #print rows

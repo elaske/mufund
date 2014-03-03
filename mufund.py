@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 21:45:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-02 02:17:56
+# @Last Modified time: 2014-03-02 23:08:26
 
 import urllib
 import urllib2
@@ -21,12 +21,13 @@ def main():
     holdingsURL = 'http://portfolios.morningstar.com/fund/holdings?t='
     googleFinanceURL = 'http://www.google.com/finance?q='
 
-    sq = StockQuote("goog")
-    print sq.price, sq.change, sq.percent
-    print sq
+    #sq = StockQuote("goog")
+    #print sq.price, sq.change, sq.percent
+    #print sq
 
     mfd = MutualFundData("FBIOX")
     print mfd.price, mfd.change, mfd.percent
+    print mfd.holdings()
 
 # Standard main call
 if __name__ == "__main__":
