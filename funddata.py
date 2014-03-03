@@ -3,12 +3,13 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-02 23:31:49
+# @Last Modified time: 2014-03-03 01:23:02
 
 import urllib
 import urllib2
 import html5lib
 from bs4 import BeautifulSoup
+from bs4 import element
 from stockquote import StockQuote
 import json
 
@@ -66,9 +67,15 @@ class MutualFundData(StockQuote):
         holdingRows = tbody[0]('tr', class_='')
 
         holdingHeaderElements = self._holding_data[0]('thead')[0]('th')
+        #holdingHeaderList = [e.contents for e in holdingHeaderElements]
+        #holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), i) for i in holdingHeaderList]
+        holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderElements]
+        holdingHeaderStrings = [[repr(i) for i in l] for l in holdingHeaderList]
 
-        print len(holdingHeaderElements), len(holdingRows[0]('td'))
-        print holdingHeaderElements
+        #for e in holdingHeaderStrings:
+        #    print [type(i) for i in e]
+
+        print holdingHeaderList
 
         #print rows[0]('td', align='right')
         #print len(rows)
