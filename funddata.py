@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-03 01:23:02
+# @Last Modified time: 2014-03-03 19:32:41
 
 import urllib
 import urllib2
@@ -70,12 +70,31 @@ class MutualFundData(StockQuote):
         #holdingHeaderList = [e.contents for e in holdingHeaderElements]
         #holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), i) for i in holdingHeaderList]
         holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderElements]
-        holdingHeaderStrings = [[repr(i) for i in l] for l in holdingHeaderList]
 
-        #for e in holdingHeaderStrings:
-        #    print [type(i) for i in e]
+        print "repr():"
+        print [[repr(i) for i in l] for l in holdingHeaderList]
 
+        print "str():"
+        print [[str(i) for i in l] for l in holdingHeaderList]
+
+        print "raw"
+        print [[i for i in l] for l in holdingHeaderList]
+
+        # Convert the NavigableStrings into actual strings
+        holdingHeaderStrings = [[str(i) for i in l] for l in holdingHeaderList]
+        # Join the sub-list strings with spaces to get a list of combined strings
+        holdingHeaderStrings = [' '.join(i) for i in holdingHeaderStrings]
+
+        print "List:"
         print holdingHeaderList
+        print "Strings:"
+        print holdingHeaderStrings
+
+        # Remove all the extra whitespace from any of these strings.
+        holdingHeaderStrings = [' '.join(s.split()) for s in holdingHeaderStrings]
+
+        print "Split / Join:"
+        print holdingHeaderStrings
 
         #print rows[0]('td', align='right')
         #print len(rows)
