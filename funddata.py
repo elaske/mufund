@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-03 19:32:41
+# @Last Modified time: 2014-03-03 19:58:19
 
 import urllib
 import urllib2
@@ -66,10 +66,10 @@ class MutualFundData(StockQuote):
         # The data rows are undecorated <tr>, so only take those:
         holdingRows = tbody[0]('tr', class_='')
 
-        holdingHeaderElements = self._holding_data[0]('thead')[0]('th')
+        holdingHeaderTags = self._holding_data[0]('thead')[0]('th')
         #holdingHeaderList = [e.contents for e in holdingHeaderElements]
         #holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), i) for i in holdingHeaderList]
-        holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderElements]
+        holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderTags]
 
         print "repr():"
         print [[repr(i) for i in l] for l in holdingHeaderList]
@@ -96,6 +96,10 @@ class MutualFundData(StockQuote):
         print "Split / Join:"
         print holdingHeaderStrings
 
-        #print rows[0]('td', align='right')
-        #print len(rows)
-        #print rows
+        #print '\nholdingRows'
+        #print holdingRows
+        #print holdingRows[0]
+        print holdingRows[0].contents
+        #for child in holdingRows[0].children:
+        #    print child
+
