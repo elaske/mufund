@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-03 19:58:19
+# @Last Modified time: 2014-03-05 01:00:27
 
 import urllib
 import urllib2
@@ -66,9 +66,9 @@ class MutualFundData(StockQuote):
         # The data rows are undecorated <tr>, so only take those:
         holdingRows = tbody[0]('tr', class_='')
 
+        # Within the only <table> and within the only <thead>, get all of the header cells.
         holdingHeaderTags = self._holding_data[0]('thead')[0]('th')
-        #holdingHeaderList = [e.contents for e in holdingHeaderElements]
-        #holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), i) for i in holdingHeaderList]
+        # Remove all of the extranneous sub-tags - we only care about strings.
         holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderTags]
 
         print "repr():"
@@ -96,10 +96,16 @@ class MutualFundData(StockQuote):
         print "Split / Join:"
         print holdingHeaderStrings
 
+        print "Contents:"
         #print '\nholdingRows'
         #print holdingRows
         #print holdingRows[0]
         print holdingRows[0].contents
-        #for child in holdingRows[0].children:
-        #    print child
 
+        # Remove all of the non-tags to remove extranneous objects.
+        holdingRowList = [filter(lambda x: isinstance(x, element.Tag), e.contents) for e in holdingRows]
+        print holdingRowList[0], len(holdingRowList[0])
+        # Remove the extra <td> that doesn't match up with the <th> header elements
+        for r in holdingRowList:
+            del r[3]
+        print holdingRowList[0], len(holdingRowList[0])
