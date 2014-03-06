@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-05 01:00:27
+# @Last Modified time: 2014-03-06 00:25:50
 
 import urllib
 import urllib2
@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from bs4 import element
 from stockquote import StockQuote
 import json
+from collections import OrderedDict
 
 class MutualFundData(StockQuote):
     """
@@ -109,3 +110,29 @@ class MutualFundData(StockQuote):
         for r in holdingRowList:
             del r[3]
         print holdingRowList[0], len(holdingRowList[0])
+
+        print '\nStrings:'
+        # For each row's elements, get the only string from it. 
+        # If there so happens to be more than one, it will combine them.
+        holdingRowStrings = [[' '.join([s for s in e.strings]) for e in row] for row in holdingRowList]
+        print holdingRowStrings
+
+        # Put the holding data into a dictionary
+        holdingData = OrderedDict()
+        # Using an OrderedDict to keep the sorting order from the website.
+        for row in holdingRowStrings:
+            temp = OrderedDict()
+            # Manually change the holding data header. 
+            # Makes more sense than "Top 25 Holdings" when accessed later.
+            temp["Holding"] = row[1]
+            # Ignore the first 3 items
+            for index in range(3, len(row)):
+                # Only add data where the header actually means something.
+                if holdingHeaderStrings[index]:
+                    # Map the header strings as keys and the row data as the data.
+                    temp[holdingHeaderStrings[index]] = row[index]
+            # Use the name of the holding as the key for this whole thing.
+            holdingData[row[1]] = temp
+
+        print '\nData:'
+        print holdingData
