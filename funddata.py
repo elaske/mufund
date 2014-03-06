@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-06 00:25:50
+# @Last Modified time: 2014-03-06 00:52:01
 
 import urllib
 import urllib2
@@ -61,6 +61,9 @@ class MutualFundData(StockQuote):
         """
         Returns a tuple of {ticker : portfolio weight} for all available holdings.
         """
+
+        # -------------------- HOLDING DATA TABLE --------------------
+
         # This grabs the correct <tbody> tag which holds the table data
         tbody = self._holding_data[0]('tbody', id='holding_epage0')
         # There are "empty" rows, but they have a class specified.
@@ -136,3 +139,39 @@ class MutualFundData(StockQuote):
 
         print '\nData:'
         print holdingData
+
+        # --------------------- PRICE DATA TABLE ---------------------
+
+        # This grabs the correct <tbody> tag which holds the table data
+        tbody = self._price_data[0]('tbody', id='holding_price_page0')
+        # There are "empty" rows, but they have a class specified.
+        # The data rows are undecorated <tr>, so only take those:
+        holdingRows = tbody[0]('tr', class_='')
+        # Remove all of the non-tags to remove extranneous objects.
+        holdingRowList = [filter(lambda x: isinstance(x, element.Tag), e.contents) for e in holdingRows]
+        print "\nPrice Row:"
+        print holdingRowList[0], len(holdingRowList[0])
+
+        print '\nStrings:'
+        # For each row's elements, get the only string from it. 
+        # If there so happens to be more than one, it will combine them.
+        holdingRowStrings = [[' '.join([s for s in e.strings]) for e in row] for row in holdingRowList]
+        print holdingRowStrings
+
+        # Within the only <table> and within the only <thead>, get all of the header cells.
+        holdingHeaderTags = self._price_data[0]('thead')[0]('th')
+        # Remove all of the extranneous sub-tags - we only care about strings.
+        holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderTags]
+
+        # Remove column that has non-ascii characters in it for spacing.
+        del holdingHeaderList[6]
+
+        # Convert the NavigableStrings into actual strings
+        holdingHeaderStrings = [[str(i) for i in l] for l in holdingHeaderList]
+        # Join the sub-list strings with spaces to get a list of combined strings
+        holdingHeaderStrings = [' '.join(i) for i in holdingHeaderStrings]
+        # Remove all the extra whitespace from any of these strings.
+        holdingHeaderStrings = [' '.join(s.split()) for s in holdingHeaderStrings]
+
+        print "\nHeader:"
+        print holdingHeaderStrings, len(holdingHeaderStrings)
