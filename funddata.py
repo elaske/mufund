@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-06 22:43:57
+# @Last Modified time: 2014-03-06 22:50:18
 
 import urllib
 import urllib2
@@ -182,4 +182,4 @@ class MutualFundData(StockQuote):
         # for holding in holdingData.keys():
         #     print holdingData[holding].keys()
 
-        return [{v['Ticker'], v['% Portfolio Weight']} for (k, v) in holdingData.items()]
+        return {v['Ticker']: v['% Portfolio Weight'] for (k, v) in holdingData.items()}
