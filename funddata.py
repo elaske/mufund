@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-06 00:52:01
+# @Last Modified time: 2014-03-06 22:25:31
 
 import urllib
 import urllib2
@@ -74,15 +74,6 @@ class MutualFundData(StockQuote):
         holdingHeaderTags = self._holding_data[0]('thead')[0]('th')
         # Remove all of the extranneous sub-tags - we only care about strings.
         holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderTags]
-
-        print "repr():"
-        print [[repr(i) for i in l] for l in holdingHeaderList]
-
-        print "str():"
-        print [[str(i) for i in l] for l in holdingHeaderList]
-
-        print "raw"
-        print [[i for i in l] for l in holdingHeaderList]
 
         # Convert the NavigableStrings into actual strings
         holdingHeaderStrings = [[str(i) for i in l] for l in holdingHeaderList]
@@ -156,6 +147,10 @@ class MutualFundData(StockQuote):
         # For each row's elements, get the only string from it. 
         # If there so happens to be more than one, it will combine them.
         holdingRowStrings = [[' '.join([s for s in e.strings]) for e in row] for row in holdingRowList]
+        # Remove extra whitespace from the data.
+        holdingRowStrings = [[' '.join(s.split()) for s in l] for l in holdingRowStrings]
+        # Filter out empty strings - they're falsy
+        holdingRowStrings = [filter(lambda x: x, e) for e in holdingRowStrings]
         print holdingRowStrings
 
         # Within the only <table> and within the only <thead>, get all of the header cells.
@@ -163,15 +158,28 @@ class MutualFundData(StockQuote):
         # Remove all of the extranneous sub-tags - we only care about strings.
         holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderTags]
 
-        # Remove column that has non-ascii characters in it for spacing.
-        del holdingHeaderList[6]
-
         # Convert the NavigableStrings into actual strings
-        holdingHeaderStrings = [[str(i) for i in l] for l in holdingHeaderList]
+        holdingHeaderStrings = [[unicode(i).encode('ascii','ignore') for i in l] for l in holdingHeaderList]
         # Join the sub-list strings with spaces to get a list of combined strings
         holdingHeaderStrings = [' '.join(i) for i in holdingHeaderStrings]
         # Remove all the extra whitespace from any of these strings.
         holdingHeaderStrings = [' '.join(s.split()) for s in holdingHeaderStrings]
+        # Filter out empty strings - they're falsy
+        holdingHeaderStrings = filter(lambda x: x, holdingHeaderStrings)
 
         print "\nHeader:"
         print holdingHeaderStrings, len(holdingHeaderStrings)
+
+        # Using an OrderedDict to keep the sorting order from the website.
+        for row in holdingRowStrings:
+            # For all of the data in this table,
+            for index in range(1, len(row)):
+                # Add it to the existing data - it will match by the name (element 1)
+                holdingData[row[0]][holdingHeaderStrings[index]] = row[index]
+
+        print '\nData Header:'
+        # Print the holding data keys to compare.
+        for holding in holdingData.keys():
+            print holdingData[holding].keys()
+
+        
