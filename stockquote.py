@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 23:12:45
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-08 21:56:31
+# @Last Modified time: 2014-03-08 23:22:35
 
 import urllib
 import re
@@ -77,10 +77,11 @@ class StockQuote:
 
         # Grab the content from the new URL.
         self._content = urllib.urlopen(self._url + self._ticker).read()
-        logging.debug('HTML: {0}'.format(self._content))
+        # This is probably overkill:
+        # logging.debug('HTML: {0}'.format(self._content))
 
         self._soup = BeautifulSoup(self._content)
-        logging.debug('BeautifulSoup: {0}'.format(self._soup))
+        logging.debug('BeautifulSoup: {0}'.format(self._soup('div', id="sharebox-data")[0].find_all('meta')))
 
         # Get strip all of the meta tag attributes into a dictionary from the correct div tag container.
         self._data = {
