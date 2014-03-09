@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-06 22:50:18
+# @Last Modified time: 2014-03-09 18:04:45
 
 import urllib
 import urllib2
@@ -13,6 +13,7 @@ from bs4 import element
 from stockquote import StockQuote
 import json
 from collections import OrderedDict
+import logging
 
 class MutualFundData(StockQuote):
     """
@@ -23,10 +24,14 @@ class MutualFundData(StockQuote):
     holdingsURL = 'http://portfolios.morningstar.com/fund/holdings?t='
     
     def __init__(self):
-        super(MutualFundData, self).__init__()
+        self._url = 'http://finance.google.com/finance?q='
+        self._ticker = ''
+        logging.info('MutualFundData created, no ticker')
 
     def __init__(self, ticker):
-        super(MutualFundData, self).__init__(ticker)
+        self._url = 'http://finance.google.com/finance?q='
+        self._ticker = ticker
+        logging.info('MutualFundData created, ticker = {0}'.format(ticker))
         # Grab the content since the requirements are here.
         self.update()
 
@@ -36,6 +41,7 @@ class MutualFundData(StockQuote):
         """
         # First, update the quote for the fund through StockQuote
         super(MutualFundData, self).update()
+        logging.info('MutualFundData.update()')
 
         # These URLs are from the Morningstar site scripts.
         ajaxURL = 'http://portfolios.morningstar.com/fund/ajax/'
@@ -44,23 +50,21 @@ class MutualFundData(StockQuote):
         jsonHoldings = urllib.urlopen(ajaxURL + ajaxPage).read()
         # Strip the leading and trailing characters so we can load it correctly.
         jsonHoldings = jsonHoldings.strip('?()')
-
         dictHoldings = json.loads(jsonHoldings)
-
-        #print dictHoldings.keys()
+        logging.debug('JSON Dict Keys: {0}'.format(dictHoldings.keys()))
 
         # Create a soup for the HTML
         self._soup = BeautifulSoup(dictHoldings['htmlStr'])
         self._holding_data = self._soup('table', id='equity_holding_tab')
+        logging.debug('Holding Tab: {0}'.format(self._holding_data))
         self._price_data = self._soup('table', id='equityPrice_holding_tab')
-
-        #print self._holding_data
-        #print self._price_data
+        logging.debug('Price Tab: {0}'.format(self._price_data))
 
     def holdings(self):
         """
         Returns a tuple of {ticker : portfolio weight} for all available holdings.
         """
+        logging.info('MutualFundData.holdings()')
 
         # -------------------- HOLDING DATA TABLE --------------------
 
