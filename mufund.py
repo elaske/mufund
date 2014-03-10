@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 21:45:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-08 23:06:47
+# @Last Modified time: 2014-03-09 23:48:43
 
 import urllib
 import urllib2
@@ -45,12 +45,36 @@ def main():
     # Gather the data from the given stocks
     testStockQuote(args.tickers)
 
+    # Test the mutual fund data gathering
+    testMutualFund(args.tickers)
+
 def testStockQuote(tickers):
     """
     """
     for ticker in tickers:
         sq = StockQuote(ticker)
         print sq.ticker, sq.price, sq.change, sq.percent
+
+
+def testMutualFund(tickers):
+    """
+    """
+    for ticker in tickers:
+        mfd = MutualFundData(ticker)
+        print mfd.price, mfd.change, mfd.percent
+
+        holdings = mfd.holdings()
+        #print holdings
+        for h in holdings:
+            print 'Retrieving {0} data...'.format(h)
+            sq = StockQuote(h)
+            delta = float(holdings[h])*float(sq.percent)/100
+            holdings[h] = [holdings[h], sq.price, sq.change, sq.percent, delta]
+            print 'Complete.'
+        #print holdings
+        print '\nESTIMATED CHANGE: {0}\nTOTAL COMPOSITION: {1}'.format(
+            sum([v[4] for (k,v) in holdings.items()]),
+            sum([float(v[0]) for (k,v) in holdings.items()]))
 
 def randomTest():
     ticker = "FBIOX"
