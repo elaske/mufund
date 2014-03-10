@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-09 18:04:45
+# @Last Modified time: 2014-03-09 23:20:05
 
 import urllib
 import urllib2
@@ -68,52 +68,43 @@ class MutualFundData(StockQuote):
 
         # -------------------- HOLDING DATA TABLE --------------------
 
+        # Within the only <table> and within the only <thead>, get all of the header cells.
+        holdingHeaderTags = self._holding_data[0]('thead')[0]('th')
+        # Remove all of the extranneous sub-tags - we only care about strings.
+        holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderTags]
+        # Convert the NavigableStrings into actual strings
+        holdingHeaderStrings = [[str(i) for i in l] for l in holdingHeaderList]
+        # Join the sub-list strings with spaces to get a list of combined strings
+        holdingHeaderStrings = [' '.join(i) for i in holdingHeaderStrings]
+
+        logging.debug('Holding Header List: {0}'.format(holdingHeaderList))
+        logging.debug('Holding Header Strings: {0}'.format(holdingHeaderStrings))
+
+        # Remove all the extra whitespace from any of these strings.
+        holdingHeaderStrings = [' '.join(s.split()) for s in holdingHeaderStrings]
+        logging.debug('Combined Holding Header Strings: {0}'.format(holdingHeaderStrings))
+
         # This grabs the correct <tbody> tag which holds the table data
         tbody = self._holding_data[0]('tbody', id='holding_epage0')
         # There are "empty" rows, but they have a class specified.
         # The data rows are undecorated <tr>, so only take those:
         holdingRows = tbody[0]('tr', class_='')
 
-        # Within the only <table> and within the only <thead>, get all of the header cells.
-        holdingHeaderTags = self._holding_data[0]('thead')[0]('th')
-        # Remove all of the extranneous sub-tags - we only care about strings.
-        holdingHeaderList = [filter(lambda x: isinstance(x, element.NavigableString), e.contents) for e in holdingHeaderTags]
-
-        # Convert the NavigableStrings into actual strings
-        holdingHeaderStrings = [[str(i) for i in l] for l in holdingHeaderList]
-        # Join the sub-list strings with spaces to get a list of combined strings
-        holdingHeaderStrings = [' '.join(i) for i in holdingHeaderStrings]
-
-        # print "List:"
-        # print holdingHeaderList
-        # print "Strings:"
-        # print holdingHeaderStrings
-
-        # Remove all the extra whitespace from any of these strings.
-        holdingHeaderStrings = [' '.join(s.split()) for s in holdingHeaderStrings]
-
-        # print "Split / Join:"
-        # print holdingHeaderStrings
-
-        # print "Contents:"
-        #print '\nholdingRows'
-        #print holdingRows
-        #print holdingRows[0]
-        # print holdingRows[0].contents
+        logging.debug('Holding Data Rows: {0}'.format(holdingRows))
+        logging.debug('Example Row Content ([0].contents): {0}'.format(holdingRows[0].contents))
 
         # Remove all of the non-tags to remove extranneous objects.
         holdingRowList = [filter(lambda x: isinstance(x, element.Tag), e.contents) for e in holdingRows]
-        # print holdingRowList[0], len(holdingRowList[0])
+        logging.debug('Example Filtered Rows: {0}'.format(holdingRowList[0]))
         # Remove the extra <td> that doesn't match up with the <th> header elements
         for r in holdingRowList:
             del r[3]
-        # print holdingRowList[0], len(holdingRowList[0])
+        logging.debug('Example Trimmed Rows: {0}'.format(holdingRowList[0]))
 
-        # print '\nStrings:'
         # For each row's elements, get the only string from it. 
         # If there so happens to be more than one, it will combine them.
         holdingRowStrings = [[' '.join([s for s in e.strings]) for e in row] for row in holdingRowList]
-        # print holdingRowStrings
+        logging.debug('Row Strings: {0}'.format(holdingRowStrings))
 
         # Put the holding data into a dictionary
         holdingData = OrderedDict()
@@ -132,8 +123,7 @@ class MutualFundData(StockQuote):
             # Use the name of the holding as the key for this whole thing.
             holdingData[row[1]] = temp
 
-        # print '\nData:'
-        # print holdingData
+        logging.debug('New Data Dict: {0}'.format(holdingData))
 
         # --------------------- PRICE DATA TABLE ---------------------
 
