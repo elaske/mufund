@@ -1,0 +1,65 @@
+ <script type="text/javascript">
+    function tooltipCallback(){
+   	 $(".help2").mouseover(function(ev){
+   		 var maxHeight=$(document).height();
+   		 var maxWidth=$(document).width();
+   		 {//adjust position.
+   			 var position=mouseCoords(ev);
+   			 var xOverflow=(position.x+420)>maxWidth;
+   			 var yOverflow=(position.y+220)>maxHeight;
+   			 var xaxis=0;
+   			 var yaxis=(yOverflow)?maxHeight-240:position.y;
+   	
+   			 //if xaxis or yaxis or both overflow,adjust it.
+   			 if(yOverflow){
+   			 xaxis=(xOverflow)?maxWidth-710:position.x
+   			 }else{
+   			 xaxis=(xOverflow)?maxWidth-420:position.x;
+   			 }
+   	
+   			 //if is the min width.
+   			 if(maxWidth<=995){
+   				 xaxis=430;
+   			 }
+   		 }
+
+   		 $("#divToolTip").css({top:yaxis+20,left:xaxis+20});
+   		 $("#divToopTipText").html($(this).attr("title2"));
+   		 $("#divToolTip").show();
+   	 });
+
+   	 $(".help2").mouseleave(function(){
+   	 	$("#divToolTip").hide();
+   	 });
+   }
+   function mouseCoords(ev){
+       if(ev.pageX||ev.pageY){return {x:ev.pageX, y:ev.pageY};}
+       return {x:ev.clientX + document.documentElement.scrollLeft,y:ev.clientY + document.documentElement.scrollTop}
+   }
+   
+   
+   
+   		var url = "//portfolios.morningstar.com/fund/ajax/";
+	
+		$.getJSON(
+			url+"holdings_performanceChart?&t=XNAS:FBIOX&region=usa&culture=en-US&cur=USD&dataType=0&callback=?",
+			{},
+			function (data){
+			  	if($("#detailsChart").length > 0){
+					portfolio_holdings_showPerformanceChart(data,"detailsChart");
+			  	}
+			}
+		);
+	
+		$.getJSON(
+			url+"holdings_tab?&t=XNAS:FBIOX&region=usa&culture=en-US&cur=USD&dataType=0&callback=?",
+			{},
+			function (data){
+					portfolio_holdings_showTable(data,"holdingTabs");
+					$("#equity_holding_weighting").find('span').attr('class','ddarw1');
+
+
+				tooltipCallback();			
+			}
+		);
+</script>

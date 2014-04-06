@@ -3,25 +3,26 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 23:12:45
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-08 23:22:35
+# @Last Modified time: 2014-04-05 23:39:07
 
 import urllib
-import re
-import html5lib
-from bs4 import BeautifulSoup
+import urllib2
+import json
 import logging
 
-class StockQuote:
+class StockQuote(object):
     """
     A class that handles scraping of a ticker symbol's data from Google Finance.
     """
+    default_data = {'c_fix': None, 'cp_fix': None, 'l_fix': None, 'e': None, 'lt': None, 'ltt': None}
     
     def __init__(self):
-        self._url = 'http://finance.google.com/finance?q='
+        self._url = 'http://finance.google.com/finance/info?q='
         self._ticker = ''
+        self._data = StockQuote.default_data
 
     def __init__(self, ticker):
-        self._url = 'http://finance.google.com/finance?q='
+        self._url = 'http://finance.google.com/finance/info?q='
         self._ticker = ticker
         logging.info('StockQuote created, ticker = {0}'.format(ticker))
         # Grab the content since the requirements are here.
@@ -57,35 +58,54 @@ class StockQuote:
     @property
     def price(self):
         """The price of the given ticker."""
-        return self._data['price']
+        return self._data['cp_fix']
 
     @property
     def change(self):
         """The change in price in absolute terms."""
-        return self._data['priceChange']
+        return self._data['c_fix']
 
     @property
     def percent(self):
         """The percent change in price."""
-        return self._data['priceChangePercent']
+        return self._data['l_fix']
+
+    @property
+    def exchange(self):
+        """The exchange that the given stock trades on."""
+        return self._data['e']
+
+    @property
+    def last_trade(self):
+        """The date & time at which the price was set."""
+        return self._data['lt']
+
+    @property
+    def last_trade_time(self):
+        """The time at which the price was set."""
+        return self._data['ltt']
 
     def update(self):
         """
         Collect new data from the source URL and ticker.
+        Defaults all values to 'None' if error.
         """
         logging.info('StockQuote.update()')
 
-        # Grab the content from the new URL.
-        self._content = urllib.urlopen(self._url + self._ticker).read()
-        # This is probably overkill:
-        # logging.debug('HTML: {0}'.format(self._content))
+        # Catch the exception caused by Google giving crap data.
+        try:
+            # Grab the content from the new URL.
+            lines = urllib.urlopen(self._url + self._ticker).read().splitlines()
+            logging.debug('lines: {0}'.format(lines))
 
-        self._soup = BeautifulSoup(self._content)
-        logging.debug('BeautifulSoup: {0}'.format(self._soup('div', id="sharebox-data")[0].find_all('meta')))
+            # Format it into good JSON
+            self._content = ''.join([x for x in lines if x not in ('// [', ']')])
+            logging.debug('JSON: {0}'.format(self._content))
 
-        # Get strip all of the meta tag attributes into a dictionary from the correct div tag container.
-        self._data = {
-            meta.get('itemprop'): meta.get('content') 
-            for meta in self._soup('div', id="sharebox-data")[0].find_all('meta')
-        }
-        logging.debug('Data: {0}'.format(self._data))        
+            self._data = json.loads(self._content)
+            logging.debug('Data: {0}'.format(self._data))
+
+        # Blanket catch so that any problems with urllib or loads() are caught
+        except:
+            # Set the data values back to default if there's an error.
+            self._data = StockQuote.default_data
