@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-09 23:52:11
+# @Last Modified time: 2014-04-05 23:25:20
 
 import urllib
 import urllib2
@@ -24,12 +24,12 @@ class MutualFundData(StockQuote):
     holdingsURL = 'http://portfolios.morningstar.com/fund/holdings?t='
     
     def __init__(self):
-        self._url = 'http://finance.google.com/finance?q='
+        self._url = 'http://finance.google.com/finance/info?q='
         self._ticker = ''
         logging.info('MutualFundData created, no ticker')
 
     def __init__(self, ticker):
-        self._url = 'http://finance.google.com/finance?q='
+        self._url = 'http://finance.google.com/finance/info?q='
         self._ticker = ticker
         logging.info('MutualFundData created, ticker = {0}'.format(ticker))
         # Grab the content since the requirements are here.
