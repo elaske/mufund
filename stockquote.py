@@ -11,7 +11,7 @@ import html5lib
 from bs4 import BeautifulSoup
 import logging
 
-class StockQuote:
+class StockQuote(object):
     """
     A class that handles scraping of a ticker symbol's data from Google Finance.
     """
