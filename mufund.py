@@ -3,7 +3,7 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 21:45:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-03-09 23:48:43
+# @Last Modified time: 2015-03-16 17:15:11
 
 import urllib
 import urllib2
@@ -64,13 +64,14 @@ def testMutualFund(tickers):
         print mfd.price, mfd.change, mfd.percent
 
         holdings = mfd.holdings()
-        #print holdings
+        print holdings
         for h in holdings:
             print 'Retrieving {0} data...'.format(h)
             sq = StockQuote(h)
             delta = float(holdings[h])*float(sq.percent)/100
             holdings[h] = [holdings[h], sq.price, sq.change, sq.percent, delta]
-            print 'Complete.'
+            print delta, holdings[h], 'Complete.'
+            print sq
         #print holdings
         print '\nESTIMATED CHANGE: {0}\nTOTAL COMPOSITION: {1}'.format(
             sum([v[4] for (k,v) in holdings.items()]),

@@ -3,27 +3,41 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 23:12:45
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-04-05 23:39:07
+# @Last Modified time: 2015-03-16 23:58:54
 
 import urllib
 import urllib2
 import json
 import logging
 
+class StockQuoteEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, StockQuote):
+            tempDict = obj.__dict__
+
+            # Delete the things we don't care to serialize
+            del tempDict['_content']
+
+            # Remove all of the leading underscores
+            for (k,v) in tempDict.items():
+                if k[0] == '_':
+                    tempDict[k[1:]] = v
+                    del tempDict[k]
+            # Let the base class throw the TypeError if there is one.
+            return tempDict
+        # Let the base class throw the TypeError that has occurred
+        return json.JSONEncoder.default(self, obj)
+
 class StockQuote(object):
     """
     A class that handles scraping of a ticker symbol's data from Google Finance.
     """
     default_data = {'c_fix': None, 'cp_fix': None, 'l_fix': None, 'e': None, 'lt': None, 'ltt': None}
-    
-    def __init__(self):
-        self._url = 'http://finance.google.com/finance/info?q='
-        self._ticker = ''
-        self._data = StockQuote.default_data
 
-    def __init__(self, ticker):
+    def __init__(self, ticker=''):
         self._url = 'http://finance.google.com/finance/info?q='
         self._ticker = ticker
+        self._data = StockQuote.default_data
         logging.info('StockQuote created, ticker = {0}'.format(ticker))
         # Grab the content since the requirements are here.
         self.update()
@@ -44,7 +58,7 @@ class StockQuote(object):
     @property
     def ticker(self):
         """The ticker of the data to be collected."""
-        return self._data['tickerSymbol']
+        return self._ticker
     @ticker.setter
     def ticker(self, value):
         logging.debug('StockQuote ticker changed from {0} to {1}'.format(self._ticker, value))
@@ -109,3 +123,13 @@ class StockQuote(object):
         except:
             # Set the data values back to default if there's an error.
             self._data = StockQuote.default_data
+
+    def __str__(self):
+        # Human-readable
+        return json.dumps(self, sort_keys=True, indent=4, separators=(',', ': '), cls=StockQuoteEncoder)
+
+        # Single-line
+        # return json.dumps(self, separators=(',',': '), cls=StockQuoteEncoder)
+
+if __name__ == '__main__':
+    print StockQuote('GOOGL')
