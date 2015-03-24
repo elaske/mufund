@@ -3,20 +3,18 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 23:12:45
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2015-03-16 23:58:54
+# @Last Modified time: 2015-03-23 23:15:06
 
 import urllib
 import urllib2
 import json
 import logging
+import copy
 
 class StockQuoteEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, StockQuote):
-            tempDict = obj.__dict__
-
-            # Delete the things we don't care to serialize
-            del tempDict['_content']
+            tempDict = copy.deepcopy(obj.__dict__)
 
             # Remove all of the leading underscores
             for (k,v) in tempDict.items():
@@ -34,13 +32,16 @@ class StockQuote(object):
     """
     default_data = {'c_fix': None, 'cp_fix': None, 'l_fix': None, 'e': None, 'lt': None, 'ltt': None}
 
-    def __init__(self, ticker=''):
-        self._url = 'http://finance.google.com/finance/info?q='
-        self._ticker = ticker
-        self._data = StockQuote.default_data
-        logging.info('StockQuote created, ticker = {0}'.format(ticker))
-        # Grab the content since the requirements are here.
-        self.update()
+    def __init__(self, ticker='', jsonString=''):
+        if jsonString:
+            self.fromJSON(jsonString=jsonString)
+        else:
+            self._url = 'http://finance.google.com/finance/info?q='
+            self._ticker = ticker
+            self._data = StockQuote.default_data
+            logging.info('StockQuote created, ticker = {0}'.format(ticker))
+            # Grab the content since the requirements are here.
+            self.update()
 
     @property
     def url(self):
@@ -51,9 +52,6 @@ class StockQuote(object):
         self._url = value
         # Grab the content from the new URL.
         self.update()
-    @url.deleter
-    def url(self):
-        del self._url
 
     @property
     def ticker(self):
@@ -65,9 +63,6 @@ class StockQuote(object):
         self._ticker = value
         # Grab the content from the new ticker.
         self.update()
-    @ticker.deleter
-    def ticker(self):
-        del self._ticker
 
     @property
     def price(self):
@@ -119,17 +114,28 @@ class StockQuote(object):
             self._data = json.loads(self._content)
             logging.debug('Data: {0}'.format(self._data))
 
+            del self._content   # clean up, we don't need this anymore
+
         # Blanket catch so that any problems with urllib or loads() are caught
         except:
             # Set the data values back to default if there's an error.
             self._data = StockQuote.default_data
 
-    def __str__(self):
+    def toJSON(self):
         # Human-readable
         return json.dumps(self, sort_keys=True, indent=4, separators=(',', ': '), cls=StockQuoteEncoder)
 
         # Single-line
         # return json.dumps(self, separators=(',',': '), cls=StockQuoteEncoder)
+    
+    def fromJSON(self, jsonString):
+        tempDict = json.loads(jsonString)
+        for a in tempDict.keys():
+            setattr(self, '_' + a, tempDict[a])
 
 if __name__ == '__main__':
-    print StockQuote('GOOGL')
+    google = StockQuote('GOOGL')
+    print google.toJSON()
+    print StockQuote(jsonString=google.toJSON()).toJSON()
+    if google.toJSON() == StockQuote(jsonString=google.toJSON()).toJSON():
+        print "Success"

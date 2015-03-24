@@ -3,51 +3,58 @@
 # @Author: Evan Laske
 # @Date:   2015-03-16 17:24:58
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2015-03-17 00:13:28
+# @Last Modified time: 2015-03-23 23:08:09
 
 import datetime
 import json
 import logging
+import copy
 from StockQuote import StockQuote, StockQuoteEncoder
 
 class StockTransactionEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, StockTransaction):
-            tempDict = obj.__dict__
+            tempDict = copy.deepcopy(obj.__dict__)
             # Remove all of the leading underscores
             for (k,v) in tempDict.items():
                 if k[0] == '_':
                     tempDict[k[1:]] = v
                     del tempDict[k]
-            tempDict['quote'] = StockQuoteEncoder().default(tempDict['quote'])
+            if tempDict['quote']:
+                tempDict['quote'] = StockQuoteEncoder().default(tempDict['quote'])
             return tempDict
         # Let the base class throw the TypeError that has occurred
         return json.JSONEncoder.default(self, obj)
-
-class StockTransactionDecoder(json.JSONDecoder):
-    def default(self, obj):
-        #return json.JSONDecoder.default(self, obj.__dict__)
-        pass
 
 class StockTransaction(object):
     """
     A class that defines a stock transaction.
     """
 
-    def __init__(self, ttype=None):
-        self._date = ''
-        self._time = ''
-        print self._time
-        self._ticker = ''
-        self._price = 0.0
-        self._quote = StockQuote()
-        self._shares = 0.0
-        self._amount = 0.0
-
-        if ttype:
-            self._ttype = ttype
-        else: 
-            self._ttype = ''
+    def __init__(self, 
+                date=None,
+                time=None,
+                ticker='',
+                price=0.0,
+                quote=None,
+                shares=0.0,
+                amount=0.0,
+                ttype='',
+                jsonString=''
+            ):
+        if jsonString:
+            self.fromJSON(jsonString=jsonString)
+        else:
+            self.date = date
+            self.time = time
+            if ticker:
+                self.quote = StockQuote(ticker)
+            else:
+                self.quote = quote
+            self.price = price
+            self.shares = shares
+            self.amount = amount
+            self.ttype = ttype
 
     @property
     def date(self):
@@ -56,7 +63,7 @@ class StockTransaction(object):
     @date.setter
     def date(self, value):
         self._date = value
-    @date.getter
+    @date.deleter
     def date(self):
         del self._date
 
@@ -67,20 +74,20 @@ class StockTransaction(object):
     @time.setter
     def time(self, value):
         self._time = value
-    @time.getter
+    @time.deleter
     def time(self):
         del self._time
 
     @property
     def ticker(self):
         "The ticker of the security."
-        return self._ticker
+        if self._quote:
+            return self._quote.ticker
+        else:
+            return ''
     @ticker.setter
     def ticker(self, value):
-        self._ticker = str(value)
-    @ticker.getter
-    def ticker(self):
-        del self._ticker
+        self._quote = StockQuote(ticker)
 
     @property
     def price(self):
@@ -89,7 +96,7 @@ class StockTransaction(object):
     @price.setter
     def price(self, value):
         self._price = value
-    @price.getter
+    @price.deleter
     def price(self):
         del self._price
 
@@ -100,7 +107,7 @@ class StockTransaction(object):
     @quote.setter
     def quote(self, value):
         self._quote = value
-    @quote.getter
+    @quote.deleter
     def quote(self):
         del self._quote
 
@@ -111,7 +118,7 @@ class StockTransaction(object):
     @shares.setter
     def shares(self, value):
         self._shares = value
-    @shares.getter
+    @shares.deleter
     def shares(self):
         del self._shares
 
@@ -122,7 +129,7 @@ class StockTransaction(object):
     @amount.setter
     def amount(self, value):
         self._amount = value
-    @amount.getter
+    @amount.deleter
     def amount(self):
         del self._amount
 
@@ -133,17 +140,30 @@ class StockTransaction(object):
     @ttype.setter
     def ttype(self, value):
         self._ttype = value
-    @ttype.getter
+    @ttype.deleter
     def ttype(self):
         del self._ttype
 
-    def __str__(self):
+    def toJSON(self):
         # Human-readable
         return json.dumps(self, sort_keys=True, indent=4, separators=(',', ': '), cls=StockTransactionEncoder)
 
         # Single-line
         # return json.dumps(self, separators=(',',': '), cls=StockTransactionEncoder)
 
+    def fromJSON(self, jsonString):
+        tempDict = json.loads(jsonString)
+        for a in tempDict.keys():
+            # recursively convert stock quote
+            if a == 'quote':
+                setattr(self, '_' + a, StockQuote(jsonString=json.dumps(tempDict[a])))
+            else:
+                setattr(self, '_' + a, tempDict[a])
+
 if __name__ == '__main__':
-    print StockQuote('')
-    print StockTransaction('Buy')
+    # print StockQuote('')
+    st = StockTransaction(ticker='GOOGL')
+    print st.toJSON()
+    print StockTransaction(jsonString=st.toJSON()).toJSON()
+    if st.toJSON() == StockTransaction(jsonString=st.toJSON()).toJSON():
+        print "Success"
