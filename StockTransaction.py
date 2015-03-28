@@ -20,7 +20,7 @@ class StockTransactionEncoder(json.JSONEncoder):
                 if k[0] == '_':
                     tempDict[k[1:]] = v
                     del tempDict[k]
-            if tempDict['quote']:
+            if 'quote' in tempDict.keys() and tempDict['quote']:
                 tempDict['quote'] = StockQuoteEncoder().default(tempDict['quote'])
             return tempDict
         # Let the base class throw the TypeError that has occurred
