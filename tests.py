@@ -3,15 +3,15 @@
 # @Author: Evan Laske
 # @Date:   2014-03-01 21:45:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2015-03-16 17:15:11
+# @Last Modified time: 2015-09-15 23:51:12
 
 import urllib
 import urllib2
 from bs4 import BeautifulSoup
 import html5lib
 import re
-from stockquote import StockQuote
-from funddata import MutualFundData
+from StockQuote import StockQuote
+from MutualFundData import MutualFundData
 import logging
 import argparse 
 
