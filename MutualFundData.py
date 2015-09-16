@@ -3,14 +3,14 @@
 # @Author: Evan Laske
 # @Date:   2014-03-02 01:05:31
 # @Last Modified by:   Evan Laske
-# @Last Modified time: 2014-04-05 23:25:20
+# @Last Modified time: 2015-09-15 23:49:55
 
 import urllib
 import urllib2
 import html5lib
 from bs4 import BeautifulSoup
 from bs4 import element
-from stockquote import StockQuote
+from StockQuote import StockQuote
 import json
 from collections import OrderedDict
 import logging
