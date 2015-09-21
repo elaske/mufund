@@ -10,14 +10,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-r', '--row', type=int, default=0, help='Specify the row to start converting.')
     parser.add_argument('infile', metavar='infile', nargs='+', type=str, help='The file(s) to convert.')
-    parser.add_argument('outfile', nargs='?', default=sys.stdout, type=argparse.FileType('w'), help='Specify an output file.')
+    parser.add_argument('-o','--outfile', default=sys.stdout, type=argparse.FileType('w'), help='Specify an output file.')
     args = parser.parse_args()
 
     locale.setlocale( locale.LC_ALL, 'en_US.UTF-8' )
 
     # Output structure separated for file
     if len(args.infile) > 1:
-        output = {i:[] for i in args.infile}
+        output = {i.split('.')[0]:[] for i in args.infile}
     else:
         output = []
 
@@ -59,7 +59,7 @@ def main():
 
             # Add to the output list
             if len(args.infile) > 1:
-                output[infile].append(row)
+                output[infile.split('.')[0]].append(row)
             else:
                 output.append(row)
 
