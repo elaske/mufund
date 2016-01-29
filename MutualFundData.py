@@ -45,7 +45,7 @@ class MutualFundData(StockQuote):
 
         # These URLs are from the Morningstar site scripts.
         ajaxURL = 'http://portfolios.morningstar.com/fund/ajax/'
-        ajaxPage = 'holdings_tab?&t=XNAS:FBIOX&region=usa&culture=en-US&cur=USD&dataType=0&callback=?'
+        ajaxPage = 'holdings_tab?&t=XNAS:{}&region=usa&culture=en-US&cur=USD&dataType=0&callback=?'.format(self.ticker)
         # Grab the JSON data from the source
         jsonHoldings = urllib.urlopen(ajaxURL + ajaxPage).read()
         # Strip the leading and trailing characters so we can load it correctly.
